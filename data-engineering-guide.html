@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Engineering System Design - Complete Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        h2 {
+            color: #34495e;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        
+        h3 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        
+        .architecture-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .component {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .component:hover {
+            transform: translateY(-5px);
+        }
+        
+        .component.source {
+            background: linear-gradient(135deg, #ff6b6b, #ffa726);
+        }
+        
+        .component.ingestion {
+            background: linear-gradient(135deg, #4ecdc4, #26d0ce);
+        }
+        
+        .component.processing {
+            background: linear-gradient(135deg, #a8e6cf, #66bb6a);
+        }
+        
+        .component.storage {
+            background: linear-gradient(135deg, #ffd93d, #ffb74d);
+        }
+        
+        .component.serving {
+            background: linear-gradient(135deg, #ff8a65, #ff7043);
+        }
+        
+        .component.consumption {
+            background: linear-gradient(135deg, #ba68c8, #9c27b0);
+        }
+        
+        .arrow {
+            font-size: 30px;
+            color: #3498db;
+            margin: 0 10px;
+        }
+        
+        .flow-diagram {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .lambda-architecture {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            align-items: center;
+            margin: 30px 0;
+        }
+        
+        .batch-layer, .speed-layer, .serving-layer {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .batch-layer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .speed-layer {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .serving-layer {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .edge-cases {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .monitoring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .monitoring-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-top: 4px solid #3498db;
+        }
+        
+        .monitoring-card.metrics {
+            border-top-color: #e74c3c;
+        }
+        
+        .monitoring-card.logs {
+            border-top-color: #f39c12;
+        }
+        
+        .monitoring-card.traces {
+            border-top-color: #27ae60;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .tech-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .security-layers {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .security-layer {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .testing-pyramid {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .pyramid-level {
+            margin: 10px auto;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .pyramid-level.e2e {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            width: 200px;
+        }
+        
+        .pyramid-level.integration {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            width: 300px;
+        }
+        
+        .pyramid-level.unit {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            width: 400px;
+        }
+        
+        .best-practices {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+        
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .checklist-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checklist-item::before {
+            content: "✓";
+            color: #2ecc71;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .linkedin-script {
+            background: linear-gradient(135deg, #0077b5, #0066a2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 5px solid #00a0dc;
+        }
+        
+        .data-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+        }
+        
+        .flow-step {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .flow-step::after {
+            content: "→";
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #3498db;
+        }
+        
+        .flow-step:last-child::after {
+            display: none;
+        }
+        
+        .storage-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .storage-type {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .storage-type.bronze {
+            background: linear-gradient(135deg, #cd7f32, #a0522d);
+        }
+        
+        .storage-type.silver {
+            background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+        }
+        
+        .storage-type.gold {
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Data Engineering System Design: Complete Guide</h1>
+        
+        <div class="linkedin-script">
+            <h3>💡 LinkedIn Opening Script</h3>
+            <p><strong>"Building robust data engineering systems isn't just about moving data from point A to point B. It's about creating resilient, scalable architectures that can handle the unexpected while delivering consistent value to your organization. Today, I'll walk you through the essential components of modern data engineering system design, covering everything from ingestion to consumption, with real-world edge cases that every data engineer should consider."</strong></p>
+        </div>
+
+        <h2>🏗️ System Architecture Overview</h2>
+        <div class="architecture-diagram">
+            <div class="component source">
+                <h4>📊 Data Sources</h4>
+                <div class="tech-stack">
+                    <span class="tech-item">APIs</span>
+                    <span class="tech-item">Databases</span>
+                    <span class="tech-item">Files</span>
+                    <span class="tech-item">Streams</span>
+                </div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="component ingestion">
+                <h4>📥 Ingestion Layer</h4>
+                <div class="tech-stack">
+                    <span class="tech-item">Kafka</span>
+                    <span class="tech-item">Kinesis</span>
+                    <span class="tech-item">Airbyte</span>
+                    <span class="tech-item">Flume</span>
+                </div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="component processing">
+                <h4>⚙️ Processing Layer</h4>
+                <div class="tech-stack">
+                    <span class="tech-item">Spark</span>
+                    <span class="tech-item">Flink</span>
+                    <span class="tech-item">Storm</span>
+                    <span class="tech-item">Beam</span>
+                </div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="component storage">
+                <h4>🗄️ Storage Layer</h4>
+                <div class="tech-stack">
+                    <span class="tech-item">Data Lake</span>
+                    <span class="tech-item">Data Warehouse</span>
+                    <span class="tech-item">NoSQL</span>
+                    <span class="tech-item">OLAP</span>
+                </div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="component serving">
+                <h4>🚀 Serving Layer</h4>
+                <div class="tech-stack">
+                    <span class="tech-item">Redis</span>
+                    <span class="tech-item">Elasticsearch</span>
+                    <span class="tech-item">GraphQL</span>
+                    <span class="tech-item">REST APIs</span>
+                </div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="component consumption">
+                <h4>📈 Consumption Layer</h4>
+                <div class="tech-stack">
+                    <span class="tech-item">Dashboards</span>
+                    <span class="tech-item">ML Models</span>
+                    <span class="tech-item">Analytics</span>
+                    <span class="tech-item">Reports</span>
+                </div>
+            </div>
+        </div>
+
+        <h2>📊 Data Ingestion Patterns</h2>
+        
+        <h3>🔄 Batch Processing Flow</h3>
+        <div class="flow-diagram">
+            <div class="data-flow">
+                <div class="flow-step">
+                    <div class="component source">Source System</div>
+                    <small>Files, APIs, DBs</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component ingestion">Scheduler</div>
+                    <small>Cron, Airflow</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component processing">Extract</div>
+                    <small>Python, Scala</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component processing">Transform</div>
+                    <small>Spark, Flink</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component storage">Load</div>
+                    <small>S3, HDFS</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component serving">Validate</div>
+                    <small>Data Quality</small>
+                </div>
+            </div>
+        </div>
+
+        <h3>⚡ Stream Processing Flow</h3>
+        <div class="flow-diagram">
+            <div class="data-flow">
+                <div class="flow-step">
+                    <div class="component source">Event Source</div>
+                    <small>Clicks, Logs, Sensors</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component ingestion">Message Queue</div>
+                    <small>Kafka, Kinesis, Pulsar</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component processing">Stream Processor</div>
+                    <small>Flink, Storm, Spark</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component storage">Real-time Storage</div>
+                    <small>Redis, Cassandra</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component consumption">Consumer</div>
+                    <small>Dashboard, Alerts, ML</small>
+                </div>
+            </div>
+        </div>
+
+        <h2>🏛️ Lambda Architecture</h2>
+        <div class="lambda-architecture">
+            <div class="batch-layer">
+                <h4>📊 Batch Layer</h4>
+                <p>• Hadoop/Spark<br>• Historical Processing<br>• Complete Data Sets</p>
+            </div>
+            <div class="serving-layer">
+                <h4>🔄 Serving Layer</h4>
+                <p>• Merge Views<br>• Query Engine<br>• Caching Layer</p>
+            </div>
+            <div class="speed-layer">
+                <h4>⚡ Speed Layer</h4>
+                <p>• Kafka/Kinesis<br>• Storm/Flink<br>• Real-time Processing</p>
+            </div>
+        </div>
+
+        <h2>🗄️ Storage Layer Design</h2>
+        <h3>🏛️ Data Lake Architecture (Medallion)</h3>
+        <div class="storage-types">
+            <div class="storage-type bronze">
+                <h4>🥉 Bronze Zone (Raw)</h4>
+                <p>• Original Format<br>• Immutable<br>• All Data Types<br>• Partitioned</p>
+            </div>
+            <div class="storage-type silver">
+                <h4>🥈 Silver Zone (Cleansed)</h4>
+                <p>• Validated<br>• Standardized<br>• Enriched<br>• Deduplicated</p>
+            </div>
+            <div class="storage-type gold">
+                <h4>🥇 Gold Zone (Curated)</h4>
+                <p>• Aggregated<br>• Business Ready<br>• Optimized<br>• Governed</p>
+            </div>
+        </div>
+
+        <h2>⚠️ Edge Cases and Failure Scenarios</h2>
+        
+        <div class="edge-cases">
+            <h3>🔄 Schema Evolution Challenge</h3>
+            <div class="data-flow">
+                <div class="flow-step">
+                    <div class="component source">Version 1</div>
+                    <small>id, name, email</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component ingestion">Version 2</div>
+                    <small>id, name, email, phone</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component processing">Version 3</div>
+                    <small>id, name, email, phone, address</small>
+                </div>
+            </div>
+            <p><strong>Solutions:</strong> Schema Registry, Backward Compatibility, Gradual Migration</p>
+        </div>
+
+        <div class="edge-cases">
+            <h3>🔥 Cascading Failures</h3>
+            <div class="data-flow">
+                <div class="flow-step">
+                    <div class="component source">Service A Fails</div>
+                    <small>Timeout Errors</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component ingestion">Service B Overloaded</div>
+                    <small>Queue Full</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component processing">Service C Fails</div>
+                    <small>Connection Refused</small>
+                </div>
+                <div class="flow-step">
+                    <div class="component storage">System Down</div>
+                    <small>Complete Outage</small>
+                </div>
+            </div>
+            <p><strong>Mitigation:</strong> Circuit Breakers, Bulkheads, Timeouts, Graceful Degradation</p>
+        </div>
+
+        <h2>📊 Monitoring and Observability</h2>
+        <div class="monitoring-grid">
+            <div class="monitoring-card metrics">
+                <h4>📈 Metrics</h4>
+                <ul>
+                    <li>CPU/Memory Usage</li>
+                    <li>Throughput</li>
+                    <li>Error Rates</li>
+                    <li>Latency</li>
+                </ul>
+            </div>
+            <div class="monitoring-card logs">
+                <h4>📝 Logs</h4>
+                <ul>
+                    <li>Application Logs</li>
+                    <li>System Logs</li>
+                    <li>Audit Trails</li>
+                    <li>Debug Information</li>
+                </ul>
+            </div>
+            <div class="monitoring-card traces">
+                <h4>🔍 Traces</h4>
+                <ul>
+                    <li>Request Flow</li>
+                    <li>Latency Analysis</li>
+                    <li>Dependencies</li>
+                    <li>Bottlenecks</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🔐 Security and Compliance</h2>
+        <div class="security-layers">
+            <div class="security-layer">
+                <h4>🛡️ Application Security</h4>
+                <p>Authentication, Authorization, Input Validation</p>
+            </div>
+            <div class="security-layer">
+                <h4>🔒 Data Security</h4>
+                <p>Encryption, Masking, Access Controls</p>
+            </div>
+            <div class="security-layer">
+                <h4>🌐 Network Security</h4>
+                <p>VPN, Firewalls, Network Segmentation</p>
+            </div>
+            <div class="security-layer">
+                <h4>🏗️ Infrastructure Security</h4>
+                <p>OS Hardening, Patch Management, Monitoring</p>
+            </div>
+        </div>
+
+        <h2>📏 Testing Strategy</h2>
+        <div class="testing-pyramid">
+            <div class="pyramid-level e2e">
+                <h4>🔍 End-to-End Tests</h4>
+                <p>Few, Slow, Comprehensive</p>
+            </div>
+            <div class="pyramid-level integration">
+                <h4>🔗 Integration Tests</h4>
+                <p>Some, Medium Speed, API & DB</p>
+            </div>
+            <div class="pyramid-level unit">
+                <h4>⚡ Unit Tests</h4>
+                <p>Many, Fast, Individual Components</p>
+            </div>
+        </div>
+
+        <h2>🎯 Best Practices</h2>
+        <div class="best-practices">
+            <h3>🔧 Design Principles</h3>
+            <div class="checklist">
+                <div class="checklist-item">Idempotency - Safe to repeat operations</div>
+                <div class="checklist-item">Immutability - Data not modified in-place</div>
+                <div class="checklist-item">Lineage - Track data from source to destination</div>
+                <div class="checklist-item">Observability - Monitor everything that matters</div>
+                <div class="checklist-item">Fault Tolerance - Assume failures will happen</div>
+                <div class="checklist-item">Scalability - Design for growth</div>
+            </div>
+            
+            <h3>📋 Implementation Checklist</h3>
+            <div class="checklist">
+                <div class="checklist-item">Schema versioning strategy</div>
+                <div class="checklist-item">Data quality monitoring</div>
+                <div class="checklist-item">Automated testing pipeline</div>
+                <div class="checklist-item">Disaster recovery procedures</div>
+                <div class="checklist-item">Security compliance measures</div>
+                <div class="checklist-item">Performance monitoring</div>
+                <div class="checklist-item">Documentation and runbooks</div>
+                <div class="checklist-item">Team training and knowledge sharing</div>
+            </div>
+        </div>
+
+        <h2>🛠️ Technology Stack Reference</h2>
+        <div class="flow-diagram">
+            <h3>Ingestion Tools</h3>
+            <div class="tech-stack">
+                <span class="tech-item">Apache Kafka</span>
+                <span class="tech-item">AWS Kinesis</span>
+                <span class="tech-item">Apache Pulsar</span>
+                <span class="tech-item">Apache Flume</span>
+                <span class="tech-item">Airbyte</span>
+                <span class="tech-item">Fivetran</span>
+            </div>
+            
+            <h3>Processing Frameworks</h3>
+            <div class="tech-stack">
+                <span class="tech-item">Apache Spark</span>
+                <span class="tech-item">Apache Flink</span>
+                <span class="tech-item">Apache Storm</span>
+                <span class="tech-item">Apache Beam</span>
+                <span class="tech-item">dbt</span>
+                <span class="tech-item">Apache NiFi</span>
+            </div>
+            
+            <h3>Storage Solutions</h3>
+            <div class="tech-stack">
+                <span class="tech-item">Amazon S3</span>
+                <span class="tech-item">Apache Hadoop</span>
+                <span class="tech-item">Delta Lake</span>
+                <span class="tech-item">Apache Iceberg</span>
+                <span class="tech-item">Snowflake</span>
+                <span class="tech-item">BigQuery</span>
+            </div>
+            
+            <h3>Orchestration</h3>
+            <div class="tech-stack">
+                <span class="tech-item">Apache Airflow</span>
+                <span class="tech-item">Prefect</span>
+                <span class="tech-item">Dagster</span>
+                <span class="tech-item">Apache Argo</span>
+                <span class="tech-item">Luigi</span>
+                <span class="tech-item">Kubeflow</span>
+            </div>
+        </div>
+
+        <div class="linkedin-script">
+            <h3>🎯 LinkedIn Closing Script</h3>
+            <p><strong>"Building robust data engineering systems requires thinking beyond the happy path. The real value comes from handling edge cases gracefully, implementing proper monitoring, and designing for failure. Remember: it's not about building the perfect system, but about building a system that fails gracefully and recovers quickly. Every data engineer should focus on these fundamentals to create systems that truly serve their organizations."</strong></p>
+            
+            <p><strong>💡 Key Takeaways:</strong></p>
+            <ul>
+                <li>🔄 Design for failure, not just success</li>
+                <li>📊 Monitor everything that matters</li>
+                <li>🛡️ Security and compliance are not optional</li>
+                <li>📈 Scalability should be built-in, not bolted-on</li>
+                <li>🧪 Test early, test often, test everything</li>
+            </ul>
+            
+            <p><strong>What's your biggest challenge in data engineering? Share your thoughts in the comments! 👇</strong></p>
+        </div>
+    </div>
+</body>
+</html>
